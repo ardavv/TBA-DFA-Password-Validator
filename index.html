@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>DFA Password Validator - Checklist Mode</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+            background: #ececec;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 450px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #007bff;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .checklist li {
+            margin-bottom: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            color: #dc3545;
+            transition: 0.3s;
+        }
+
+        .checklist li.met {
+            color: #28a745;
+        }
+
+        .icon {
+            margin-right: 10px;
+            font-weight: bold;
+            width: 20px;
+        }
+
+        .result-box {
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-box.valid {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-box.invalid {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .path-log {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #555;
+            background: #f9f9f9;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Validator Password DFA</h2>
+        <input type="text" id="passInput" placeholder="Ketik password di sini..." autocomplete="off">
+
+        <ul class="checklist" id="checkList">
+            <li id="rule-length"><span class="icon">✘</span> Panjang tepat 6 karakter</li>
+            <li id="rule-letter"><span class="icon">✘</span> Minimal satu huruf (a-z, A-Z)</li>
+            <li id="rule-digit"><span class="icon">✘</span> Minimal satu angka (0-9)</li>
+            <li id="rule-repeat"><span class="icon">✘</span> Tidak ada karakter berulang berurutan</li>
+            <li id="rule-alpha"><span class="icon">✘</span> Hanya huruf dan angka (tidak ada simbol)</li>
+        </ul>
+
+        <div id="finalResult" class="result-box"></div>
+        <div id="pathDisplay" class="path-log">State: q0</div>
+    </div>
+
+    <script>
+        const passInput = document.getElementById('passInput');
+        const pathDisplay = document.getElementById('pathDisplay');
+        const finalResult = document.getElementById('finalResult');
+
+        const rules = {
+                length: {
+                    el: document.getElementById('rule-length'),
+                    check: (v) => v.length === 6
+                },
+                letter: {
+                    el: document.getElementById('rule-letter'),
+                    check: (v) => /[a-zA-Z]/.test(v)
+                },
+                digit: {
+                    el: document.getElementById('rule-digit'),
+                    check: (v) => /[0-9]/.test(v)
+                },
+                repeat: {
+                    el: document.getElementById('rule-repeat'),
+                    // Tambahkan cek v.length > 0 agar tidak terceklis saat kosong
+                    check: (v) => v.length > 0 && !/(.)\1/.test(v)
+                },
+                alpha: {
+                    el: document.getElementById('rule-alpha'),
+                    // Tambahkan cek v.length > 0
+                    check: (v) => v.length > 0 && /^[a-zA-Z0-9]+$/.test(v)
+                }
+            };
+
+        function updateUI(input) {
+            let allMet = true;
+            for (const key in rules) {
+                const isMet = rules[key].check(input);
+                const li = rules[key].el;
+                const icon = li.querySelector('.icon');
+
+                if (isMet) {
+                    li.classList.add('met');
+                    icon.innerText = '✔';
+                } else {
+                    li.classList.remove('met');
+                    icon.innerText = '✘';
+                    allMet = false;
+                }
+            }
+            return allMet;
+        }
+
+        // Fungsi Inti DFA sesuai rancangan Tabel Transisi
+        function runDFA(input) {
+            let state = 'q0';
+            let path = ['q0'];
+            let lastChar = '';
+
+            for (let i = 0; i < input.length; i++) {
+                const char = input[i];
+                const pos = i + 1;
+                const isL = /[a-zA-Z]/.test(char);
+                const isD = /[0-9]/.test(char);
+
+                // Transisi ke qdead jika simbol atau karakter berulang [cite: 117, 118]
+                if ((!isL && !isD) || char === lastChar || pos > 6) {
+                    state = 'qdead';
+                    path.push(state);
+                    break;
+                }
+
+                if (state === 'q0') {
+                    state = isL ? 'q1L' : 'q1D';
+                } else if (state.endsWith('L') && !state.includes('LD')) {
+                    state = isL ? `q${pos}L` : `q${pos}LD`;
+                } else if (state.endsWith('D') && !state.includes('LD')) {
+                    state = isD ? `q${pos}D` : `q${pos}LD`;
+                } else if (state.includes('LD')) {
+                    state = `q${pos}LD`;
+                }
+
+                lastChar = char;
+                path.push(state);
+            }
+            return { state, path };
+        }
+
+        passInput.addEventListener('input', (e) => {
+                const value = e.target.value;
+                const allRulesMet = updateUI(value);
+                const dfa = runDFA(value);
+
+                pathDisplay.innerText = "Path: " + dfa.path.join(" ➔ ");
+
+                if (value === "") {
+                    // Sembunyikan jika kosong
+                    finalResult.style.display = "none";
+                } else if (dfa.state === 'q6LD' && allRulesMet) {
+                    // Tampilkan dan set ke hijau jika valid [cite: 115, 121, 133]
+                    finalResult.style.display = "block";
+                    finalResult.className = "result-box valid";
+                    finalResult.innerText = "PASSWORD VALID";
+                } else {
+                    // Tampilkan dan set ke merah jika melanggar aturan [cite: 117, 118, 119, 132]
+                    finalResult.style.display = "block";
+                    finalResult.className = "result-box invalid";
+                    finalResult.innerText = "PASSWORD INVALID";
+                }
+            });
+    </script>
+
+</body>
+
+</html>
