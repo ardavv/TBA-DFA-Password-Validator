@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DFA Password - Kelompok 7</title>
+    <!-- Font Inter & JetBrains Mono untuk kesan teknis -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap"
         rel="stylesheet">
     <style>
@@ -83,10 +84,13 @@
             position: relative;
         }
 
+        .input-wrapper {
+            position: relative;
+        }
+
         input {
             width: 100%;
             padding: 16px 48px 16px 16px;
-            /* Padding kanan untuk ikon mata */
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             font-size: 20px;
@@ -102,7 +106,6 @@
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
-        /* Menghilangkan icon mata bawaan dari Microsoft Edge agar tidak dobel */
         input::-ms-reveal,
         input::-ms-clear {
             display: none;
@@ -128,6 +131,205 @@
             color: var(--primary);
         }
 
+        /* --- Tombol Submit --- */
+        .btn-verify {
+            width: 100%;
+            padding: 16px;
+            margin-top: 16px;
+            border: none;
+            border-radius: 12px;
+            background: var(--success);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-verify:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-verify:not(:disabled):hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        /* --- Terminal Modal Styles --- */
+        .terminal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .terminal-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .terminal-window {
+            background: #0f172a;
+            width: 100%;
+            max-width: 650px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .terminal-overlay.show .terminal-window {
+            transform: translateY(0);
+        }
+
+        .terminal-header {
+            background: #1e293b;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            color: #94a3b8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .terminal-close {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            transition: color 0.2s;
+        }
+
+        .terminal-close:hover {
+            color: #dc2626;
+        }
+
+        .terminal-body {
+            padding: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #4ade80;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            min-height: 250px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1em;
+            background: #4ade80;
+            animation: blink 1s step-end infinite;
+            vertical-align: bottom;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* --- Receipt Box Styles --- */
+        .receipt-box {
+            background: #f8fafc;
+            color: #0f172a;
+            margin-top: 24px;
+            padding: 24px;
+            border-radius: 8px;
+            border: 2px dashed #94a3b8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            animation: slideUp 0.5s ease-out;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .receipt-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            border-bottom: 2px dashed #cbd5e1;
+            padding-bottom: 12px;
+            color: #1e293b;
+        }
+
+        .receipt-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .receipt-label {
+            width: 140px;
+            font-weight: 700;
+            flex-shrink: 0;
+            color: #475569;
+        }
+
+        .receipt-value {
+            word-break: break-all;
+            color: #0f172a;
+        }
+
+        /* --- Collapsible Section Styles --- */
         .toggle-header {
             display: flex;
             justify-content: space-between;
@@ -169,18 +371,6 @@
 
         .toggle-content.show {
             display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .transition-visual {
@@ -359,20 +549,21 @@
             </header>
 
             <div class="input-section">
-                <!-- Type diubah jadi password -->
-                <input type="password" id="passInput" placeholder="MASUKKAN PASSWORD" maxlength="10" spellcheck="false"
-                    autocomplete="off">
-                <button type="button" class="toggle-password" id="togglePassword"
-                    aria-label="Toggle password visibility">
-                    <!-- Icon Eye Off (Default) -->
-                    <svg id="eyeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
-                        </path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                </button>
+                <div class="input-wrapper">
+                    <input type="password" id="passInput" placeholder="MASUKKAN PASSWORD" maxlength="10"
+                        spellcheck="false" autocomplete="off">
+                    <button type="button" class="toggle-password" id="togglePassword"
+                        aria-label="Toggle password visibility">
+                        <svg id="eyeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                            </path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                    </button>
+                </div>
+                <button id="verifyBtn" class="btn-verify" disabled>VERIFY PASSWORD</button>
             </div>
 
             <div id="statusBadge" class="status-badge" style="display:none;"></div>
@@ -382,7 +573,7 @@
                 <li id="rule-let"><span class="icon">○</span> Minimal terdapat 1 Huruf</li>
                 <li id="rule-dig"><span class="icon">○</span> Minimal terdapat 1 Angka</li>
                 <li id="rule-dup"><span class="icon">○</span> Tidak ada karakter berulang berurutan</li>
-                <li id="rule-alph"><span class="icon">○</span> Karakter Alfanumerik (A-Z, 0-9)</li>
+                <li id="rule-alph"><span class="icon">○</span> Karakter Alfanumerik (A-Z/a-z, 0-9)</li>
             </ul>
 
             <div class="toggle-header" onclick="toggleSection('traceContent', 'traceChevron')"
@@ -438,6 +629,19 @@
         </aside>
     </div>
 
+    <!-- Terminal Overlay (Hidden by Default) -->
+    <div id="terminalOverlay" class="terminal-overlay">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span>root@dfa-password-simulator:~# validation_protocol</span>
+                <button class="terminal-close" id="closeTerminalBtn">&times;</button>
+            </div>
+            <div id="terminalBody" class="terminal-body">
+                <span id="typedText"></span><span class="cursor"></span>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -454,17 +658,20 @@
         const togglePasswordBtn = document.getElementById('togglePassword');
         const eyeIcon = document.getElementById('eyeIcon');
 
-        // SVG Constants untuk Toggle Mata
+        // Terminal elements
+        const verifyBtn = document.getElementById('verifyBtn');
+        const terminalOverlay = document.getElementById('terminalOverlay');
+        const closeTerminalBtn = document.getElementById('closeTerminalBtn');
+        const typedText = document.getElementById('typedText');
+        const terminalBody = document.getElementById('terminalBody');
+
         const iconEyeOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
         const iconEyeClosed = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
 
-        // Event Listener Toggle Mata
         togglePasswordBtn.addEventListener('click', () => {
             const isPassword = passInput.getAttribute('type') === 'password';
             passInput.setAttribute('type', isPassword ? 'text' : 'password');
             eyeIcon.innerHTML = isPassword ? iconEyeOpen : iconEyeClosed;
-
-            // Panggil updateView ulang agar isi dari trace menyesuaikan visibilitas
             updateView();
         });
 
@@ -477,7 +684,6 @@
         function toggleSection(contentId, chevronId) {
             const content = document.getElementById(contentId);
             const chevron = document.getElementById(chevronId);
-
             if (content.classList.contains('show')) {
                 content.classList.remove('show');
                 chevron.classList.remove('open');
@@ -503,7 +709,6 @@
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-
             try {
                 document.execCommand('copy');
                 const originalHTML = btn.innerHTML;
@@ -528,9 +733,7 @@
 
             for (let i = 0; i < input.length; i++) {
                 const char = input[i];
-                // Jika input di-hide, ganti karakter pada log menjadi simbol bullet
                 const displayChar = isHidden ? '•' : char;
-
                 const pos = i + 1;
                 const isL = /[a-zA-Z]/.test(char);
                 const isD = /[0-9]/.test(char);
@@ -561,10 +764,7 @@
 
         function updateView() {
             const val = passInput.value;
-            // Cek apakah mode password sedang aktif
             const isHidden = passInput.getAttribute('type') === 'password';
-
-            // Masukkan parameter isHidden ke dalam logika DFA untuk formatting
             const dfa = runDFA(val, isHidden);
 
             document.querySelectorAll('.state-pill').forEach(el => el.className = 'state-pill');
@@ -589,27 +789,116 @@
             if (val === "") {
                 statusBadge.style.display = "none";
                 transVisual.innerText = "q0";
+                verifyBtn.disabled = true;
             } else {
                 statusBadge.style.display = "block";
                 transVisual.innerText = dfa.pathTrace;
 
                 if (dfa.state === 'q6LD') {
                     statusBadge.className = "status-badge valid";
-                    statusBadge.innerText = "ACCEPTED";
-                } else if (dfa.state === 'qdead') {
-                    statusBadge.className = "status-badge rejected";
-                    statusBadge.innerText = "REJECTED";
+                    statusBadge.innerText = "ACCEPTED: Final State q6LD Tercapai";
+                    verifyBtn.disabled = false; // Aktifkan tombol submit
                 } else {
-                    statusBadge.className = "status-badge invalid";
-                    statusBadge.innerText = `PROCESSING`;
+                    verifyBtn.disabled = true; // Matikan tombol submit
+                    if (dfa.state === 'qdead') {
+                        statusBadge.className = "status-badge rejected";
+                        statusBadge.innerText = "REJECTED: Mesin Masuk ke Dead State";
+                    } else {
+                        statusBadge.className = "status-badge invalid";
+                        statusBadge.innerText = `PROCESSING: Berada di ${dfa.state}...`;
+                    }
                 }
-
                 transVisual.scrollLeft = transVisual.scrollWidth;
             }
         }
 
         initStates();
         passInput.addEventListener('input', updateView);
+
+        // --- Terminal Animation Logic ---
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        closeTerminalBtn.addEventListener('click', () => {
+            terminalOverlay.classList.remove('show');
+        });
+
+        terminalOverlay.addEventListener('click', (e) => {
+            if (e.target === terminalOverlay) {
+                terminalOverlay.classList.remove('show');
+            }
+        });
+
+        verifyBtn.addEventListener('click', async () => {
+            const val = passInput.value;
+            // Jalankan DFA ulang tanpa mode hidden untuk mendapatkan trace aslinya di dalam struk
+            const dfa = runDFA(val, false);
+
+            terminalOverlay.classList.add('show');
+            typedText.innerHTML = ''; // Reset terminal
+
+            const lines = [
+                "> INITIALIZING SECURE CONNECTION...",
+                "> DFA VALIDATION PROTOCOL INITIATED.",
+                "> CHECKING ALPHABET (Σ) ... [OK]",
+                "> CHECKING STATE TRANSITIONS (δ) ... [OK]",
+                `> FINAL STATE REACHED: ${dfa.state}`,
+                "> MATCHING ACCEPTANCE CRITERIA ... [OK]",
+                "> ACCESS GRANTED.",
+                "<br>"
+            ];
+
+            // Efek mengetik per baris
+            for (let line of lines) {
+                if (line === "<br>") {
+                    typedText.innerHTML += "<br>";
+                    continue;
+                }
+                for (let char of line) {
+                    typedText.innerHTML += char;
+                    // Auto-scroll ke bawah saat ngetik
+                    terminalBody.scrollTop = terminalBody.scrollHeight;
+                    await sleep(15); // Kecepatan ngetik per karakter
+                }
+                typedText.innerHTML += "<br>";
+                await sleep(300); // Jeda antar baris
+            }
+
+            // Membangun format tanggal Indonesia
+            const dateStr = new Date().toLocaleString('id-ID', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+
+            // Menyisipkan Kotak Struk Bukti
+            const receiptHTML = `
+                <div class="receipt-box" style="display: block;">
+                    <div class="receipt-title">OFFICIAL DFA PASSWORD VALIDATION LOG</div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">TIMESTAMP</div>
+                        <div class="receipt-value">: ${dateStr}</div>
+                    </div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">INPUT</div>
+                        <div class="receipt-value">: ${val}</div>
+                    </div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">FINAL STATE</div>
+                        <div class="receipt-value">: ${dfa.state}</div>
+                    </div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">TRACE PATH</div>
+                        <div class="receipt-value" style="font-size: 0.8rem; line-height: 1.4;">: ${dfa.pathTrace}</div>
+                    </div>
+                    <div class="receipt-row" style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; font-weight: bold; color: #10b981; font-size: 1.1rem;">
+                        <div class="receipt-label" style="color: #10b981;">STATUS</div>
+                        <div class="receipt-value">: VALID</div>
+                    </div>
+                </div>
+            `;
+
+            typedText.innerHTML += receiptHTML;
+            terminalBody.scrollTop = terminalBody.scrollHeight; // Scroll mentok ke bawah
+        });
     </script>
 </body>
 
