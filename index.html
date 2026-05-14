@@ -3,101 +3,324 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>DFA Password Validator - Checklist Mode</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFA Password - Kelompok 7</title>
+    <!-- Font Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
     <style>
+        :root {
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --primary: #1e293b;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--primary);
+            margin: 0;
             display: flex;
             justify-content: center;
-            padding: 40px;
-            background: #ececec;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 450px;
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            min-width: 0;
+        }
+
+        header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 16px;
         }
 
         h2 {
-            margin-top: 0;
-            color: #333;
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .tuple-info {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .input-section {
+            margin-bottom: 24px;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            box-sizing: border-box;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            letter-spacing: 4px;
+            transition: all 0.2s;
             outline: none;
         }
 
         input:focus {
-            border-color: #007bff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        /* --- Collapsible Section Styles --- */
+        .toggle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px 0;
+            margin-top: 10px;
+            border-top: 1px solid #e5e7eb;
+            user-select: none;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .toggle-header:hover {
+            color: var(--primary);
+        }
+
+        .toggle-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+            width: 18px;
+            height: 18px;
+        }
+
+        .chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .toggle-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .toggle-content.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Update styling untuk transisi agar bisa horizontal scroll */
+        .transition-visual {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            margin: 10px 0 20px 0;
+            padding: 20px 85px 20px 20px;
+            /* Padding-right ditambah agar teks tidak tertutup tombol copy */
+            background: #1e293b;
+            color: #38bdf8;
+            border-radius: 12px;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow-x: auto;
+            border: 1px solid #0f172a;
+            max-width: 100%;
+        }
+
+        /* Custom scrollbar untuk kotak transisi */
+        .transition-visual::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .transition-visual::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 8px;
+        }
+
+        .transition-visual::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 8px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 20px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .status-badge {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-badge.valid {
+            background: #ecfdf5;
+            color: var(--success);
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-badge.invalid {
+            background: #fffbeb;
+            color: var(--warning);
+            border: 1px solid #fde68a;
+        }
+
+        .status-badge.rejected {
+            background: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
         }
 
         .checklist {
             list-style: none;
             padding: 0;
-            margin: 20px 0;
+            display: grid;
+            gap: 12px;
+            margin-bottom: 0;
         }
 
         .checklist li {
-            margin-bottom: 10px;
-            font-size: 14px;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            color: #dc3545;
+            color: var(--text-muted);
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 8px;
             transition: 0.3s;
         }
 
         .checklist li.met {
-            color: #28a745;
+            color: var(--success);
+            background: #f0fdf4;
+            font-weight: 600;
         }
 
         .icon {
-            margin-right: 10px;
-            font-weight: bold;
-            width: 20px;
+            margin-right: 12px;
+            font-size: 1.1rem;
         }
 
-        .result-box {
-            padding: 15px;
+        /* Side Card Styles */
+        .side-card {
+            align-self: start;
+        }
+
+        .side-card h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .state-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 8px;
+            margin-top: 16px;
+            margin-bottom: 24px;
+        }
+
+        .state-pill {
+            padding: 6px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
             border-radius: 6px;
-            font-weight: bold;
+            font-size: 11px;
             text-align: center;
-            margin-top: 20px;
-            display: none;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s;
         }
 
-        .result-box.valid {
-            display: block;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .state-pill.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+            font-weight: bold;
         }
 
-        .result-box.invalid {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .state-pill.dead {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+            font-weight: bold;
         }
 
-        .path-log {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            color: #555;
-            background: #f9f9f9;
-            padding: 10px;
-            margin-top: 15px;
-            border-radius: 4px;
-            overflow-x: auto;
+        .mjx-container {
+            margin: 0 !important;
         }
     </style>
 </head>
@@ -105,75 +328,166 @@
 <body>
 
     <div class="container">
-        <h2>Validator Password DFA</h2>
-        <input type="text" id="passInput" placeholder="Ketik password di sini..." autocomplete="off">
+        <!-- Main Panel -->
+        <main class="card main-card">
+            <header>
+                <h2>DFA Password Simulator</h2>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Tugas Teori Bahasa dan Automata (A) • Kelompok 7
+                </div>
+            </header>
 
-        <ul class="checklist" id="checkList">
-            <li id="rule-length"><span class="icon">✘</span> Panjang tepat 6 karakter</li>
-            <li id="rule-letter"><span class="icon">✘</span> Minimal satu huruf (a-z, A-Z)</li>
-            <li id="rule-digit"><span class="icon">✘</span> Minimal satu angka (0-9)</li>
-            <li id="rule-repeat"><span class="icon">✘</span> Tidak ada karakter berulang berurutan</li>
-            <li id="rule-alpha"><span class="icon">✘</span> Hanya huruf dan angka (tidak ada simbol)</li>
-        </ul>
+            <div class="input-section">
+                <input type="text" id="passInput" placeholder="MASUKKAN PASSWORD" maxlength="10" spellcheck="false"
+                    autocomplete="off">
+            </div>
 
-        <div id="finalResult" class="result-box"></div>
-        <div id="pathDisplay" class="path-log">State: q0</div>
+            <div id="statusBadge" class="status-badge" style="display:none;"></div>
+
+            <ul class="checklist">
+                <li id="rule-len"><span class="icon">○</span> Panjang tepat 6 karakter</li>
+                <li id="rule-let"><span class="icon">○</span> Minimal terdapat 1 Huruf</li>
+                <li id="rule-dig"><span class="icon">○</span> Minimal terdapat 1 Angka</li>
+                <li id="rule-dup"><span class="icon">○</span> Tidak ada karakter berulang berurutan</li>
+                <li id="rule-alph"><span class="icon">○</span> Karakter Alfanumerik (A-Z, 0-9)</li>
+            </ul>
+
+            <!-- Alur Eksekusi (Toggleable) -->
+            <div class="toggle-header" onclick="toggleSection('traceContent', 'traceChevron')"
+                style="margin-top: 24px;">
+                <div class="toggle-title">Alur Eksekusi (Trace)</div>
+                <svg id="traceChevron" class="chevron open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+            <div id="traceContent" class="toggle-content show">
+                <div style="position: relative;">
+                    <button class="copy-btn" onclick="copyTrace(this)" title="Salin Trace">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Copy
+                    </button>
+                    <div id="transitionVisual" class="transition-visual">q0</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Side Panel -->
+        <aside class="card side-card">
+            <!-- Machine States (Toggleable) -->
+            <div class="toggle-header" onclick="toggleSection('statesContent', 'statesChevron')"
+                style="border-top: none; margin-top: 0; padding-top: 0;">
+                <h3>Machine States ($Q$)</h3>
+                <svg id="statesChevron" class="chevron open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+
+            <div id="statesContent" class="toggle-content show">
+                <div class="tuple-info" style="margin-top: 10px; margin-bottom: 20px; padding: 12px;">
+                    $$M = (Q, \Sigma, \delta, q_0, F)$$
+                </div>
+
+                <div class="state-grid" id="stateContainer"></div>
+
+                <div
+                    style="margin-top: 24px; font-size: 0.8rem; color: var(--text-muted); background: #f8fafc; padding: 12px; border-radius: 8px;">
+                    <strong style="color: var(--primary);">Keterangan Status:</strong><br><br>
+                    <strong>L</strong> = Letters (Huruf)<br>
+                    <strong>D</strong> = Digits (Angka)<br>
+                    <strong>LD</strong> = Huruf & Angka<br>
+                    <strong>Dead</strong> = Kondisi Gagal
+                </div>
+            </div>
+        </aside>
     </div>
+
+    <!-- MathJax for rendering equations -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <script>
         const passInput = document.getElementById('passInput');
-        const pathDisplay = document.getElementById('pathDisplay');
-        const finalResult = document.getElementById('finalResult');
+        const stateContainer = document.getElementById('stateContainer');
+        const transVisual = document.getElementById('transitionVisual');
+        const statusBadge = document.getElementById('statusBadge');
 
-        const rules = {
-                length: {
-                    el: document.getElementById('rule-length'),
-                    check: (v) => v.length === 6
-                },
-                letter: {
-                    el: document.getElementById('rule-letter'),
-                    check: (v) => /[a-zA-Z]/.test(v)
-                },
-                digit: {
-                    el: document.getElementById('rule-digit'),
-                    check: (v) => /[0-9]/.test(v)
-                },
-                repeat: {
-                    el: document.getElementById('rule-repeat'),
-                    // Tambahkan cek v.length > 0 agar tidak terceklis saat kosong
-                    check: (v) => v.length > 0 && !/(.)\1/.test(v)
-                },
-                alpha: {
-                    el: document.getElementById('rule-alpha'),
-                    // Tambahkan cek v.length > 0
-                    check: (v) => v.length > 0 && /^[a-zA-Z0-9]+$/.test(v)
-                }
-            };
+        const allStates = [
+            'q0', 'q1L', 'q1D', 'q2L', 'q2D', 'q2LD',
+            'q3L', 'q3D', 'q3LD', 'q4L', 'q4D', 'q4LD',
+            'q5L', 'q5D', 'q5LD', 'q6L', 'q6D', 'q6LD', 'qdead'
+        ];
 
-        function updateUI(input) {
-            let allMet = true;
-            for (const key in rules) {
-                const isMet = rules[key].check(input);
-                const li = rules[key].el;
-                const icon = li.querySelector('.icon');
+        // UI Toggle Function
+        function toggleSection(contentId, chevronId) {
+            const content = document.getElementById(contentId);
+            const chevron = document.getElementById(chevronId);
 
-                if (isMet) {
-                    li.classList.add('met');
-                    icon.innerText = '✔';
-                } else {
-                    li.classList.remove('met');
-                    icon.innerText = '✘';
-                    allMet = false;
-                }
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                chevron.classList.remove('open');
+            } else {
+                content.classList.add('show');
+                chevron.classList.add('open');
             }
-            return allMet;
         }
 
-        // Fungsi Inti DFA sesuai rancangan Tabel Transisi
+        function initStates() {
+            stateContainer.innerHTML = allStates.map(s =>
+                `<div class="state-pill" id="s-${s}">${s}</div>`
+            ).join('');
+        }
+
+        // Fungsi Salin (Copy Trace)
+        function copyTrace(btn) {
+            const traceText = document.getElementById('transitionVisual').innerText;
+            const textArea = document.createElement("textarea");
+            textArea.value = traceText;
+
+            // Hindari scrolling aneh saat textarea ditambahkan ke document
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                const originalHTML = btn.innerHTML;
+
+                // Ubah status ke hijau 'Copied!'
+                btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!`;
+                btn.style.color = '#10b981';
+                btn.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+
+                // Kembalikan ke tampilan normal setelah 2 detik
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }, 2000);
+            } catch (err) {
+                console.error('Gagal menyalin:', err);
+            }
+
+            document.body.removeChild(textArea);
+        }
+
         function runDFA(input) {
             let state = 'q0';
-            let path = ['q0'];
             let lastChar = '';
+            let pathTrace = 'q0';
 
             for (let i = 0; i < input.length; i++) {
                 const char = input[i];
@@ -181,10 +495,10 @@
                 const isL = /[a-zA-Z]/.test(char);
                 const isD = /[0-9]/.test(char);
 
-                // Transisi ke qdead jika simbol atau karakter berulang [cite: 117, 118]
+                // Transition to qdead 
                 if ((!isL && !isD) || char === lastChar || pos > 6) {
                     state = 'qdead';
-                    path.push(state);
+                    pathTrace += ` ──(${char})──> qdead`;
                     break;
                 }
 
@@ -196,38 +510,67 @@
                     state = isD ? `q${pos}D` : `q${pos}LD`;
                 } else if (state.includes('LD')) {
                     state = `q${pos}LD`;
+                } else {
+                    state = isL ? `q${pos}L` : (isD ? `q${pos}D` : 'qdead');
                 }
 
+                pathTrace += ` ──(${char})──> ${state}`;
                 lastChar = char;
-                path.push(state);
             }
-            return { state, path };
+            return { state, pathTrace };
         }
 
-        passInput.addEventListener('input', (e) => {
-                const value = e.target.value;
-                const allRulesMet = updateUI(value);
-                const dfa = runDFA(value);
+        function updateView() {
+            const val = passInput.value;
+            const dfa = runDFA(val);
 
-                pathDisplay.innerText = "Path: " + dfa.path.join(" ➔ ");
+            // Update State Pills
+            document.querySelectorAll('.state-pill').forEach(el => el.className = 'state-pill');
+            const activeId = dfa.state.startsWith('q') ? `s-${dfa.state}` : 's-qdead';
+            const activeEl = document.getElementById(activeId);
+            if (activeEl) {
+                activeEl.classList.add(dfa.state === 'qdead' ? 'dead' : 'active');
+            }
 
-                if (value === "") {
-                    // Sembunyikan jika kosong
-                    finalResult.style.display = "none";
-                } else if (dfa.state === 'q6LD' && allRulesMet) {
-                    // Tampilkan dan set ke hijau jika valid [cite: 115, 121, 133]
-                    finalResult.style.display = "block";
-                    finalResult.className = "result-box valid";
-                    finalResult.innerText = "PASSWORD VALID";
+            // Checklist Logic
+            const check = (id, met) => {
+                const el = document.getElementById(id);
+                el.className = met ? 'met' : '';
+                el.querySelector('.icon').innerText = met ? '✔' : '○';
+            };
+
+            check('rule-len', val.length === 6);
+            check('rule-let', /[a-zA-Z]/.test(val));
+            check('rule-dig', /[0-9]/.test(val));
+            check('rule-dup', val.length > 0 && !/(.)\1/.test(val));
+            check('rule-alph', val.length > 0 && /^[a-zA-Z0-9]+$/.test(val));
+
+            // UI Feedback
+            if (val === "") {
+                statusBadge.style.display = "none";
+                transVisual.innerText = "q0";
+            } else {
+                statusBadge.style.display = "block";
+                transVisual.innerText = dfa.pathTrace;
+
+                if (dfa.state === 'q6LD') {
+                    statusBadge.className = "status-badge valid";
+                    statusBadge.innerText = "ACCEPTED";
+                } else if (dfa.state === 'qdead') {
+                    statusBadge.className = "status-badge rejected";
+                    statusBadge.innerText = "REJECTED";
                 } else {
-                    // Tampilkan dan set ke merah jika melanggar aturan [cite: 117, 118, 119, 132]
-                    finalResult.style.display = "block";
-                    finalResult.className = "result-box invalid";
-                    finalResult.innerText = "PASSWORD INVALID";
+                    statusBadge.className = "status-badge invalid";
+                    statusBadge.innerText = `PROCESSING`;
                 }
-            });
-    </script>
 
+                transVisual.scrollLeft = transVisual.scrollWidth;
+            }
+        }
+
+        initStates();
+        passInput.addEventListener('input', updateView);
+    </script>
 </body>
 
 </html>
