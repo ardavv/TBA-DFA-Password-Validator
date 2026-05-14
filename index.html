@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DFA Password - Kelompok 7</title>
-    <!-- Font Inter & JetBrains Mono untuk kesan teknis -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap"
         rel="stylesheet">
     <style>
@@ -99,11 +98,38 @@
             letter-spacing: 4px;
             transition: all 0.2s;
             outline: none;
+            background: #fff;
         }
 
+        /* Default Focus */
         input:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Dynamic Input States (Overriding Default Focus) */
+        input.state-processing {
+            border-color: var(--warning);
+        }
+
+        input.state-processing:focus {
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+        }
+
+        input.state-valid {
+            border-color: var(--success);
+        }
+
+        input.state-valid:focus {
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+        }
+
+        input.state-rejected {
+            border-color: var(--danger);
+        }
+
+        input.state-rejected:focus {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
         }
 
         input::-ms-reveal,
@@ -228,6 +254,11 @@
 
         .terminal-close:hover {
             color: #dc2626;
+        }
+
+        .terminal-close:disabled {
+            color: #94a3b8;
+            cursor: not-allowed;
         }
 
         .terminal-body {
@@ -537,15 +568,15 @@
     </style>
 </head>
 
-<body style="background: #0f172a;"">
+<body style="background: #0f172a;">
 
     <div class="container">
         <!-- Main Panel -->
         <main class="card main-card">
             <header>
                 <h2>DFA Password Simulator</h2>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">Proyek Teori Bahasa dan Automata (A) • Kelompok 7
-                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Proyek Teori Bahasa dan Automata (A) •
+                    Kelompok 7</div>
             </header>
 
             <div class="input-section">
@@ -573,7 +604,7 @@
                 <li id="rule-let"><span class="icon">○</span> Minimal terdapat 1 Huruf</li>
                 <li id="rule-dig"><span class="icon">○</span> Minimal terdapat 1 Angka</li>
                 <li id="rule-dup"><span class="icon">○</span> Tidak ada karakter berulang berurutan</li>
-                <li id="rule-alph"><span class="icon">○</span> Karakter Alfanumerik (A-Z/a-z, 0-9)</li>
+                <li id="rule-alph"><span class="icon">○</span> Karakter Alfanumerik (A-Z, 0-9)</li>
             </ul>
 
             <div class="toggle-header" onclick="toggleSection('traceContent', 'traceChevron')"
@@ -633,7 +664,7 @@
     <div id="terminalOverlay" class="terminal-overlay">
         <div class="terminal-window">
             <div class="terminal-header">
-                <span>root@dfa-password-simulator:~# validation_protocol</span>
+                <span>kelompok7@dfa-password-simulator:~# validation_protocol</span>
                 <button class="terminal-close" id="closeTerminalBtn">&times;</button>
             </div>
             <div id="terminalBody" class="terminal-body">
@@ -665,6 +696,9 @@
         const typedText = document.getElementById('typedText');
         const terminalBody = document.getElementById('terminalBody');
 
+        // State flag mencegah concurrency bug di terminal
+        let isTerminalAnimating = false;
+
         const iconEyeOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
         const iconEyeClosed = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
 
@@ -673,6 +707,8 @@
             passInput.setAttribute('type', isPassword ? 'text' : 'password');
             eyeIcon.innerHTML = isPassword ? iconEyeOpen : iconEyeClosed;
             updateView();
+            // Kembalikan fokus ke input setelah klik toggle
+            passInput.focus();
         });
 
         const allStates = [
@@ -767,6 +803,9 @@
             const isHidden = passInput.getAttribute('type') === 'password';
             const dfa = runDFA(val, isHidden);
 
+            // Bersihkan styling warna input box 
+            passInput.classList.remove('state-processing', 'state-valid', 'state-rejected');
+
             document.querySelectorAll('.state-pill').forEach(el => el.className = 'state-pill');
             const activeId = dfa.state.startsWith('q') ? `s-${dfa.state}` : 's-qdead';
             const activeEl = document.getElementById(activeId);
@@ -797,15 +836,18 @@
                 if (dfa.state === 'q6LD') {
                     statusBadge.className = "status-badge valid";
                     statusBadge.innerText = "ACCEPTED";
-                    verifyBtn.disabled = false; // Aktifkan tombol submit
+                    passInput.classList.add('state-valid'); // Border hijau
+                    verifyBtn.disabled = false;
                 } else {
-                    verifyBtn.disabled = true; // Matikan tombol submit
+                    verifyBtn.disabled = true;
                     if (dfa.state === 'qdead') {
                         statusBadge.className = "status-badge rejected";
                         statusBadge.innerText = "REJECTED";
+                        passInput.classList.add('state-rejected'); // Border merah
                     } else {
                         statusBadge.className = "status-badge invalid";
                         statusBadge.innerText = `PROCESSING`;
+                        passInput.classList.add('state-processing'); // Border kuning
                     }
                 }
                 transVisual.scrollLeft = transVisual.scrollWidth;
@@ -818,23 +860,30 @@
         // --- Terminal Animation Logic ---
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-        closeTerminalBtn.addEventListener('click', () => {
+        function resetTerminal() {
             terminalOverlay.classList.remove('show');
-        });
+            isTerminalAnimating = false;
+        }
+
+        closeTerminalBtn.addEventListener('click', resetTerminal);
 
         terminalOverlay.addEventListener('click', (e) => {
-            if (e.target === terminalOverlay) {
-                terminalOverlay.classList.remove('show');
+            // Hanya izinkan close via klik luar jika animasi sudah selesai
+            if (e.target === terminalOverlay && !isTerminalAnimating) {
+                resetTerminal();
             }
         });
 
         verifyBtn.addEventListener('click', async () => {
+            if (isTerminalAnimating) return; // Mencegah double click yang membuat bug overlapping text
+            isTerminalAnimating = true;
+            closeTerminalBtn.disabled = true; // Jangan biarkan user close selagi animasi jalan
+
             const val = passInput.value;
-            // Jalankan DFA ulang tanpa mode hidden untuk mendapatkan trace aslinya di dalam struk
             const dfa = runDFA(val, false);
 
             terminalOverlay.classList.add('show');
-            typedText.innerHTML = ''; // Reset terminal
+            typedText.innerHTML = '';
 
             const lines = [
                 "> INITIALIZING SECURE CONNECTION...",
@@ -847,7 +896,6 @@
                 "<br>"
             ];
 
-            // Efek mengetik per baris
             for (let line of lines) {
                 if (line === "<br>") {
                     typedText.innerHTML += "<br>";
@@ -855,24 +903,21 @@
                 }
                 for (let char of line) {
                     typedText.innerHTML += char;
-                    // Auto-scroll ke bawah saat ngetik
                     terminalBody.scrollTop = terminalBody.scrollHeight;
-                    await sleep(15); // Kecepatan ngetik per karakter
+                    await sleep(15);
                 }
                 typedText.innerHTML += "<br>";
-                await sleep(300); // Jeda antar baris
+                await sleep(300);
             }
 
-            // Membangun format tanggal Indonesia
             const dateStr = new Date().toLocaleString('id-ID', {
                 year: 'numeric', month: 'short', day: 'numeric',
                 hour: '2-digit', minute: '2-digit', second: '2-digit'
             });
 
-            // Menyisipkan Kotak Struk Bukti
             const receiptHTML = `
                 <div class="receipt-box" style="display: block;">
-                    <div class="receipt-title">OFFICIAL DFA PASSWORD VALIDATION LOG</div>
+                    <div class="receipt-title">DFA PASSWORD VALIDATION LOG</div>
                     <div class="receipt-row">
                         <div class="receipt-label">TIMESTAMP</div>
                         <div class="receipt-value">: ${dateStr}</div>
@@ -891,13 +936,17 @@
                     </div>
                     <div class="receipt-row" style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; font-weight: bold; color: #10b981; font-size: 1.1rem;">
                         <div class="receipt-label" style="color: #10b981;">STATUS</div>
-                        <div class="receipt-value">: VALID</div>
+                        <div class="receipt-value">: VALIDATED</div>
                     </div>
                 </div>
             `;
 
             typedText.innerHTML += receiptHTML;
-            terminalBody.scrollTop = terminalBody.scrollHeight; // Scroll mentok ke bawah
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+
+            // Buka kunci animasi
+            isTerminalAnimating = false;
+            closeTerminalBtn.disabled = false;
         });
     </script>
 </body>
