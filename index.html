@@ -595,13 +595,13 @@
 
                 if (dfa.state === 'q6LD') {
                     statusBadge.className = "status-badge valid";
-                    statusBadge.innerText = "ACCEPTED: Final State q6LD Tercapai";
+                    statusBadge.innerText = "ACCEPTED";
                 } else if (dfa.state === 'qdead') {
                     statusBadge.className = "status-badge rejected";
-                    statusBadge.innerText = "REJECTED: Mesin Masuk ke Dead State";
+                    statusBadge.innerText = "REJECTED";
                 } else {
                     statusBadge.className = "status-badge invalid";
-                    statusBadge.innerText = `PROCESSING: Berada di ${dfa.state}...`;
+                    statusBadge.innerText = `PROCESSING`;
                 }
 
                 transVisual.scrollLeft = transVisual.scrollWidth;
