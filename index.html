@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DFA Password - Kelompok 7</title>
-    <!-- Font Inter & JetBrains Mono -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap"
         rel="stylesheet">
     <style>
@@ -81,11 +80,13 @@
 
         .input-section {
             margin-bottom: 24px;
+            position: relative;
         }
 
         input {
             width: 100%;
-            padding: 16px;
+            padding: 16px 48px 16px 16px;
+            /* Padding kanan untuk ikon mata */
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             font-size: 20px;
@@ -101,7 +102,32 @@
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
-        /* --- Collapsible Section Styles --- */
+        /* Menghilangkan icon mata bawaan dari Microsoft Edge agar tidak dobel */
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary);
+        }
+
         .toggle-header {
             display: flex;
             justify-content: space-between;
@@ -157,13 +183,11 @@
             }
         }
 
-        /* Update styling untuk transisi agar bisa horizontal scroll */
         .transition-visual {
             font-family: 'JetBrains Mono', monospace;
             font-size: 1.1rem;
             margin: 10px 0 20px 0;
             padding: 20px 85px 20px 20px;
-            /* Padding-right ditambah agar teks tidak tertutup tombol copy */
             background: #1e293b;
             color: #38bdf8;
             border-radius: 12px;
@@ -176,7 +200,6 @@
             max-width: 100%;
         }
 
-        /* Custom scrollbar untuk kotak transisi */
         .transition-visual::-webkit-scrollbar {
             height: 8px;
         }
@@ -273,7 +296,6 @@
             font-size: 1.1rem;
         }
 
-        /* Side Card Styles */
         .side-card {
             align-self: start;
         }
@@ -337,8 +359,20 @@
             </header>
 
             <div class="input-section">
-                <input type="text" id="passInput" placeholder="MASUKKAN PASSWORD" maxlength="10" spellcheck="false"
+                <!-- Type diubah jadi password -->
+                <input type="password" id="passInput" placeholder="MASUKKAN PASSWORD" maxlength="10" spellcheck="false"
                     autocomplete="off">
+                <button type="button" class="toggle-password" id="togglePassword"
+                    aria-label="Toggle password visibility">
+                    <!-- Icon Eye Off (Default) -->
+                    <svg id="eyeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                        </path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </button>
             </div>
 
             <div id="statusBadge" class="status-badge" style="display:none;"></div>
@@ -351,7 +385,6 @@
                 <li id="rule-alph"><span class="icon">○</span> Karakter Alfanumerik (A-Z, 0-9)</li>
             </ul>
 
-            <!-- Alur Eksekusi (Toggleable) -->
             <div class="toggle-header" onclick="toggleSection('traceContent', 'traceChevron')"
                 style="margin-top: 24px;">
                 <div class="toggle-title">Alur Eksekusi (Trace)</div>
@@ -377,7 +410,6 @@
 
         <!-- Side Panel -->
         <aside class="card side-card">
-            <!-- Machine States (Toggleable) -->
             <div class="toggle-header" onclick="toggleSection('statesContent', 'statesChevron')"
                 style="border-top: none; margin-top: 0; padding-top: 0;">
                 <h3>Machine States ($Q$)</h3>
@@ -406,7 +438,6 @@
         </aside>
     </div>
 
-    <!-- MathJax for rendering equations -->
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -420,6 +451,22 @@
         const stateContainer = document.getElementById('stateContainer');
         const transVisual = document.getElementById('transitionVisual');
         const statusBadge = document.getElementById('statusBadge');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        // SVG Constants untuk Toggle Mata
+        const iconEyeOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+        const iconEyeClosed = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+
+        // Event Listener Toggle Mata
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = passInput.getAttribute('type') === 'password';
+            passInput.setAttribute('type', isPassword ? 'text' : 'password');
+            eyeIcon.innerHTML = isPassword ? iconEyeOpen : iconEyeClosed;
+
+            // Panggil updateView ulang agar isi dari trace menyesuaikan visibilitas
+            updateView();
+        });
 
         const allStates = [
             'q0', 'q1L', 'q1D', 'q2L', 'q2D', 'q2LD',
@@ -427,7 +474,6 @@
             'q5L', 'q5D', 'q5LD', 'q6L', 'q6D', 'q6LD', 'qdead'
         ];
 
-        // UI Toggle Function
         function toggleSection(contentId, chevronId) {
             const content = document.getElementById(contentId);
             const chevron = document.getElementById(chevronId);
@@ -447,17 +493,13 @@
             ).join('');
         }
 
-        // Fungsi Salin (Copy Trace)
         function copyTrace(btn) {
             const traceText = document.getElementById('transitionVisual').innerText;
             const textArea = document.createElement("textarea");
             textArea.value = traceText;
-
-            // Hindari scrolling aneh saat textarea ditambahkan ke document
             textArea.style.top = "0";
             textArea.style.left = "0";
             textArea.style.position = "fixed";
-
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
@@ -465,13 +507,9 @@
             try {
                 document.execCommand('copy');
                 const originalHTML = btn.innerHTML;
-
-                // Ubah status ke hijau 'Copied!'
                 btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!`;
                 btn.style.color = '#10b981';
                 btn.style.borderColor = 'rgba(16, 185, 129, 0.5)';
-
-                // Kembalikan ke tampilan normal setelah 2 detik
                 setTimeout(() => {
                     btn.innerHTML = originalHTML;
                     btn.style.color = '';
@@ -480,25 +518,26 @@
             } catch (err) {
                 console.error('Gagal menyalin:', err);
             }
-
             document.body.removeChild(textArea);
         }
 
-        function runDFA(input) {
+        function runDFA(input, isHidden) {
             let state = 'q0';
             let lastChar = '';
             let pathTrace = 'q0';
 
             for (let i = 0; i < input.length; i++) {
                 const char = input[i];
+                // Jika input di-hide, ganti karakter pada log menjadi simbol bullet
+                const displayChar = isHidden ? '•' : char;
+
                 const pos = i + 1;
                 const isL = /[a-zA-Z]/.test(char);
                 const isD = /[0-9]/.test(char);
 
-                // Transition to qdead 
                 if ((!isL && !isD) || char === lastChar || pos > 6) {
                     state = 'qdead';
-                    pathTrace += ` ──(${char})──> qdead`;
+                    pathTrace += ` ──(${displayChar})──> qdead`;
                     break;
                 }
 
@@ -514,7 +553,7 @@
                     state = isL ? `q${pos}L` : (isD ? `q${pos}D` : 'qdead');
                 }
 
-                pathTrace += ` ──(${char})──> ${state}`;
+                pathTrace += ` ──(${displayChar})──> ${state}`;
                 lastChar = char;
             }
             return { state, pathTrace };
@@ -522,9 +561,12 @@
 
         function updateView() {
             const val = passInput.value;
-            const dfa = runDFA(val);
+            // Cek apakah mode password sedang aktif
+            const isHidden = passInput.getAttribute('type') === 'password';
 
-            // Update State Pills
+            // Masukkan parameter isHidden ke dalam logika DFA untuk formatting
+            const dfa = runDFA(val, isHidden);
+
             document.querySelectorAll('.state-pill').forEach(el => el.className = 'state-pill');
             const activeId = dfa.state.startsWith('q') ? `s-${dfa.state}` : 's-qdead';
             const activeEl = document.getElementById(activeId);
@@ -532,7 +574,6 @@
                 activeEl.classList.add(dfa.state === 'qdead' ? 'dead' : 'active');
             }
 
-            // Checklist Logic
             const check = (id, met) => {
                 const el = document.getElementById(id);
                 el.className = met ? 'met' : '';
@@ -545,7 +586,6 @@
             check('rule-dup', val.length > 0 && !/(.)\1/.test(val));
             check('rule-alph', val.length > 0 && /^[a-zA-Z0-9]+$/.test(val));
 
-            // UI Feedback
             if (val === "") {
                 statusBadge.style.display = "none";
                 transVisual.innerText = "q0";
@@ -555,13 +595,13 @@
 
                 if (dfa.state === 'q6LD') {
                     statusBadge.className = "status-badge valid";
-                    statusBadge.innerText = "ACCEPTED";
+                    statusBadge.innerText = "ACCEPTED: Final State q6LD Tercapai";
                 } else if (dfa.state === 'qdead') {
                     statusBadge.className = "status-badge rejected";
-                    statusBadge.innerText = "REJECTED";
+                    statusBadge.innerText = "REJECTED: Mesin Masuk ke Dead State";
                 } else {
                     statusBadge.className = "status-badge invalid";
-                    statusBadge.innerText = `PROCESSING`;
+                    statusBadge.innerText = `PROCESSING: Berada di ${dfa.state}...`;
                 }
 
                 transVisual.scrollLeft = transVisual.scrollWidth;
